@@ -9,8 +9,8 @@ from rest_framework.views  import APIView
 from .serializers import ViolationHistorySerializer, UnsureViolationHistorySerializer
 from rest_framework.response import Response
 from rest_framework import status
-# import cv2
-# import easyocr
+import cv2
+import easyocr
 import glob
 import os
 import json
@@ -24,50 +24,50 @@ def get_list_violation(request):
     else:
         return render(request, 'history/violation_history.html', {"form": SearchingForm()})
 
-# class Add_Violation_History_API(APIView):
-#     def post(self, request):
-#         serializer = UnsureViolationHistorySerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             list_of_files = glob.glob(r'D:\Vehicle_Violation\Vehicle_Violation\media\unsureviolation\*')
-#             latest_file = max(list_of_files, key=os.path.getctime)
-#             print(latest_file)
+class Add_Violation_History_API(APIView):
+    def post(self, request):
+        serializer = UnsureViolationHistorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            list_of_files = glob.glob(r'D:\Vehicle_Violation\Vehicle_Violation\media\unsureviolation\*')
+            latest_file = max(list_of_files, key=os.path.getctime)
+            print(latest_file)
 
-#             harcascade = r"D:\Vehicle_Violation\Vehicle_Violation\violation_history\haarcascade_russian_plate_number.xml"
-#             # Opening image
-#             img = cv2.imread(latest_file)
+            harcascade = r"D:\Vehicle_Violation\Vehicle_Violation\violation_history\haarcascade_russian_plate_number.xml"
+            # Opening image
+            img = cv2.imread(latest_file)
 
-#             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-#             img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-#             plate_cascade = cv2.CascadeClassifier(harcascade)
+            img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            plate_cascade = cv2.CascadeClassifier(harcascade)
 
-#             found = plate_cascade.detectMultiScale(img_gray, 
-#                                             minSize =(20, 20))
+            found = plate_cascade.detectMultiScale(img_gray, 
+                                            minSize =(20, 20))
 
-#             amount_found = len(found)
-#             plate = None
-#             if amount_found != 0:
-#                 for (x, y, width, height) in found:
-#                     cv2.rectangle(img_rgb, (x, y), 
-#                                     (x + width, y + height), 
-#                                     (0, 255, 0), 5)
-#                     plate = img_rgb[y:y+height, x:x+width]
-#                     cv2.imwrite("result.jpg", plate)
+            amount_found = len(found)
+            plate = None
+            if amount_found != 0:
+                for (x, y, width, height) in found:
+                    cv2.rectangle(img_rgb, (x, y), 
+                                    (x + width, y + height), 
+                                    (0, 255, 0), 5)
+                    plate = img_rgb[y:y+height, x:x+width]
+                    cv2.imwrite("result.jpg", plate)
 
 
-#             reader = easyocr.Reader(['en'], gpu=True)
-#             result = reader.readtext(r"D:\Vehicle_Violation\Vehicle_Violation\result.jpg")
-#             try:
-#                 ve = Vehicle.objects.get(plate=result[0][-2])
-#                 des = request.POST['description']
-#                 img = request.FILES['image']
-#                 new_vio = ViolationHistory.objects.create(description=des, image= img, vehicle_id= ve.id)
-#                 new_vio.save()
-#                 unsure_vi = UnsureViolationHistory.objects.all().order_by("-id")[0]
-#                 unsure_vi.delete()
-#                 return Response(status=status.HTTP_200_OK)
-#             except:
-#                 return Response(status=status.HTTP_204_NO_CONTENT)
+            reader = easyocr.Reader(['en'], gpu=True)
+            result = reader.readtext(r"D:\Vehicle_Violation\Vehicle_Violation\result.jpg")
+            try:
+                ve = Vehicle.objects.get(plate=result[0][-2])
+                des = request.POST['description']
+                img = request.FILES['image']
+                new_vio = ViolationHistory.objects.create(description=des, image= img, vehicle_id= ve.id)
+                new_vio.save()
+                unsure_vi = UnsureViolationHistory.objects.all().order_by("-id")[0]
+                unsure_vi.delete()
+                return Response(status=status.HTTP_200_OK)
+            except:
+                return Response(status=status.HTTP_204_NO_CONTENT)
 
 def pay_fee(request, pk):
     if request.method == "POST":
