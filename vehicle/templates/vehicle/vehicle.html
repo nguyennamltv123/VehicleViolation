@@ -1,0 +1,50 @@
+{% extends 'pages/base.html' %} 
+{% block title %}Vehicle Management{%endblock%} 
+{% block content %}
+<h1 class="display-4" style="text-align: center;">List of vehicle</h1>
+<a href="{% url 'addvehicle' %}" class="btn btn-primary btn-block btn-lg">
+    <i class="fa-solid fa-plus"></i> <b>Add new vehicle</b>
+</a>
+<hr class="my-4">
+<table class="table table-borderless">
+    <thead class="border-bottom font-weight-bold">
+        <tr>
+            <th>Plate</th>
+            <th>Title</th>
+            <th>Color</th>
+            <th>Image</th>
+            <th>Owner</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for v in Vehicles %}
+        <tr>
+            <td><b>{{ v.plate }}</b></td>
+            <td>{{ v.title }}</td>
+            <td>{{ v.color }}</td>
+            {% if v.image %}
+            <td><img src="{{ v.image.url }}" width="100" height="70"></td>
+            {% else %}
+            <td>none</td>
+            {% endif %}
+            <td>{{ v.owner }}</td>
+            <td>
+                <a href='{% url 'editvehicle' v.id %}' class="btn text-secondary ">
+                    <i class="fa-solid fa-file-pen" ></i>
+                </a>
+            </td>
+            <td>
+                <form action="{% url 'deletevehicle' v.id %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">
+                        <i class="fa-solid fa-trash" style="color: red"></i>
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

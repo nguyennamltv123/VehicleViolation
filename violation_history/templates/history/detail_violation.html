@@ -1,0 +1,45 @@
+{% extends 'pages/base.html' %} 
+{% block title %}Edit vehicle profile{%endblock%} 
+{% load crispy_forms_tags %}
+{% block content %}
+<h1 class="display-4" style="text-align: center;">Details of vehicle</h1>
+<hr class="my-4">
+<form method="POST" autocomplete="off" enctype="multipart/form-data" action="{% url 'payfee' Violation.id %}">
+  {% csrf_token %}
+    <div class="row">
+      <div class="col-md-4">
+        <label>Plate</label>
+        <input class="form-control"  readonly value="{{Violation.vehicle.plate}}">
+        <label>Owner</label>
+        <input class="form-control" readonly value="{{Violation.vehicle.owner}}">
+        <label>Time</label>
+        <input class="form-control" readonly value="{{Violation.time}}">
+        <label>Status</label>
+        {% if Violation.status == True%}
+        <input class="form-control"  readonly value="Paid">
+          {% else %}
+          <input class="form-control"  readonly value="Not paid">
+          {% endif %}
+          <hr>
+          {% if user.is_authenticated %}
+          {% if Violation.status == True %}
+          <button type="submit" class="btn btn-success btn-block btn-lg" disabled><i class="fa-solid fa-sack-dollar"></i> <b>Pay</b></button>  
+          {% else %}
+          <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fa-solid fa-floppy-disk"></i> <b>Pay</b></button>  
+          {% endif %}
+          <a href="{% url 'violation_list' %}" class="btn btn-secondary btn-block btn-lg">
+            <i class="fa-solid fa-arrow-left"></i> <b>Go back</b>
+        </a>  
+        {% else %}
+        <a href="{% url 'violation_list' %}" class="btn btn-secondary btn-block btn-lg">
+          <i class="fa-solid fa-arrow-left"></i> <b>Go back</b>
+      </a>
+        {% endif %}
+      </div> 
+      <div class="col-md-8">
+        <img src="{{ Violation.image.url }}"  alt="None" class="img-thumbnail">
+      </div> 
+</div>
+      
+  </form>
+{% endblock content %}

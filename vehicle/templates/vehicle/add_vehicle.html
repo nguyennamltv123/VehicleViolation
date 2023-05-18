@@ -1,0 +1,44 @@
+{% extends 'pages/base.html' %} 
+{% block title %}Add new vehicle profile{%endblock%} 
+{% load crispy_forms_tags %}
+{% block content %}
+<h1 class="display-4" style="text-align: center;">Add new vehicle</h1>
+<hr class="my-4">
+<form method="POST" autocomplete="off" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="row">
+    <div class="col-md-4">
+        {{form.plate|as_crispy_field}}
+    </div>
+    <div class="col-md-8">
+        {{form.title|as_crispy_field}}
+    </div>
+</div> 
+<div class="row">
+  <div class="col-md-4">
+      {{form.color|as_crispy_field}}
+  </div>
+  <div class="col-md-8">
+      {{form.owner|as_crispy_field}}
+  </div>
+</div> 
+
+<div class="row">
+  <div class="col-md-5">
+      {{form.image|as_crispy_field}}
+  </div>
+</div>
+
+  <div class="row">
+    <div class="col-md-8">
+        <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fa-solid fa-floppy-disk"></i> <b>Save</b></button>  
+    </div>
+    <div class="col-md-4">
+      <a href="{% url 'veh' %}" class="btn btn-secondary btn-block btn-lg">
+        <i class="fa-solid fa-arrow-left"></i> <b>Go back</b>
+    </a>
+    </div>
+</div>
+      
+  </form>
+{% endblock content %}

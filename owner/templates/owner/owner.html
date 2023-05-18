@@ -1,0 +1,43 @@
+{% extends 'pages/base.html' %} 
+{% block title %}Owner Management{%endblock%} 
+{% block content %}
+<h1 class="display-4" style="text-align: center;">List of vehicle owner</h1>
+<a href="{% url 'addowner' %}" class="btn btn-primary btn-block btn-lg">
+    <i class="fa-solid fa-plus"></i> <b>Add new vehicle owner</b>
+</a>
+<hr class="my-4">
+<table class="table table-borderless">
+    <thead class="border-bottom font-weight-bold">
+        <tr>
+            <th>ID Number</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Image</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Edit</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for owner in Owners %}
+        <tr>
+            <td><b>{{ owner.id_card }}</b></td>
+            <td>{{ owner.firstname }}</td>
+            <td>{{ owner.lastname }}</td>
+            {% if owner.image %}
+            <td><img src="{{ owner.image.url }}" width="70" height="70"></td>
+            {% else %}
+            <td>none</td>
+            {% endif %}
+            <td>{{ owner.phone }}</td>
+            <td>{{ owner.email }}</td>
+            <td>
+                <a href='{% url 'editowner' owner.id %}' class="btn text-secondary ">
+                    <i class="fa-solid fa-file-pen" ></i>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}
