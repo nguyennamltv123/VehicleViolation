@@ -1,12 +1,27 @@
 {% extends 'pages/base.html' %} 
 {% block title %}Owner Management{%endblock%} 
 {% block content %}
+{% load crispy_forms_tags %}
 <h1 class="display-4" style="text-align: center;">List of vehicle owner</h1>
-<a href="{% url 'addowner' %}" class="btn btn-primary btn-block btn-lg">
-    <i class="fa-solid fa-plus"></i> <b>Add new vehicle owner</b>
-</a>
+<div class="row">
+    <div class="col-md-6">
+        <a href="{% url 'addowner' %}" class="btn btn-primary btn-block btn-lg">
+            <i class="fa-solid fa-plus"></i> <b>Add new vehicle owner</b>
+        </a>
+        <a href="{% url 'own' %}" class="btn btn-secondary btn-block btn-lg">
+            <i class="fa-solid fa-rotate-right"></i> <b>Reload</b>
+        </a>
+    </div>
+    <div class="col-md-6">
+        <form action="" method="POST" autocomplete="off">
+            {% csrf_token %}
+            {{form.search|as_crispy_field}}
+            <button type="submit" class="btn btn-success btn-lg"><i class="fa-solid fa-magnifying-glass"></i>  Search</button>  
+        </form>
+    </div>
+</div>
 <hr class="my-4">
-<table class="table table-borderless">
+<table class="table table-striped">
     <thead class="border-bottom font-weight-bold">
         <tr>
             <th>ID Number</th>

@@ -6,12 +6,21 @@ from .serializers import VehicleSerializer
 from rest_framework.response import Response
 from rest_framework.views  import APIView
 from rest_framework import status
-from .forms import VehicleForm
+from .forms import VehicleForm, SearchingForm
 # Create your views here.
 def list_vehicle(request):
     if request.user.is_authenticated:
-        dt = {"Vehicles": Vehicle.objects.all()}
-        return render(request, 'vehicle/vehicle.html', dt)
+        if request.method == "POST":
+            search = request.POST['search']
+            vehicle = Vehicle.objects.all().filter(plate__icontains=str(search))
+            dt = {
+                "Vehicles": vehicle,
+                "form": SearchingForm()
+            }
+            return render(request, 'vehicle/vehicle.html', dt)
+        else:
+            dt = {"Vehicles": Vehicle.objects.all(), "form": SearchingForm()}
+            return render(request, 'vehicle/vehicle.html', dt)
     else:
         return redirect('login')
     

@@ -4,12 +4,22 @@ from .serializers import OwnerSerializer
 from rest_framework.response import Response
 from rest_framework.views  import APIView
 from rest_framework import status
-from .forms import OwnerForm
+from .forms import OwnerForm, SearchingForm
 # Create your views here.
 def get_list_owner(request):
     if request.user.is_authenticated:
-        data = { 'Owners':  Owner.objects.all().order_by('-id')}
-        return render(request, 'owner/owner.html', data)
+        if request.method == "POST":
+            search = request.POST['search']
+            owner = Owner.objects.all().filter(id_card__icontains=str(search))
+            data = { 'Owners':  owner,
+                "form": SearchingForm()        
+            }
+            return render(request, 'owner/owner.html', data)
+        else:
+            data = { 'Owners':  Owner.objects.all().order_by('-id'),
+                "form": SearchingForm()        
+            }
+            return render(request, 'owner/owner.html', data)
     else:
         return redirect('login')
     

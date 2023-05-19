@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from .models import Vehicle
-
+from django import forms
 class VehicleForm(ModelForm):
     
     class Meta:
@@ -14,3 +14,6 @@ class VehicleForm(ModelForm):
             'owner': 'Vehicle Owner',
             'image': 'Image'
         }
+
+class SearchingForm(forms.Form):
+    search = forms.CharField(max_length=100, label='Plate numbers')
