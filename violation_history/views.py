@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import ViolationHistory, UnsureViolationHistory
+from .models import ViolationHistory, UnsureViolationHistory, Violation
 from vehicle.models import Vehicle
 from owner.models import Owner
-from .forms import SearchingForm
+from .forms import SearchingForm, ViolationForm
 from rest_framework.views  import APIView
 from .serializers import ViolationHistorySerializer, UnsureViolationHistorySerializer
 from rest_framework.response import Response
@@ -13,16 +13,102 @@ import cv2
 import easyocr
 import glob
 import os
-import json
+# import json
+import time
+import requests
+
 # Create your views here.
+def add_violation_type(request):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            form = ViolationForm(request.POST)
+            if form.is_valid():
+                form.save()
+            return redirect('/')
+        elif request.method == "GET":
+            form = ViolationForm()
+            return render(request, 'history/add_violation_type.html', {'form': form})
+    else:
+        return redirect('login')
+
+def add_violation_history(request, pk):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            vehicle = Vehicle.objects.get(id=pk)
+            violationtype = request.POST['violation_type']
+            time = request.POST['time']
+            img = request.FILES['image'] or None
+            new_vio = ViolationHistory.objects.create(image= img, vehicle_id= pk, violation_id= violationtype, time= time)
+            new_vio.save()
+            messages.success(request, 'Added violation history!')
+            return redirect('/get_vehicle_has_violation')
+        elif request.method == "GET":
+            vehicle = Vehicle.objects.get(id=pk)
+            violation_type = Violation.objects.all()
+            dt = {
+                'vehicle': vehicle,
+                'violation_type': violation_type
+            }
+            return render(request, 'history/form_add_violation_history.html', dt)
+    else:
+        return redirect('login')
+
+def search_vehicle_has_violation(request):
+    if request.method == "POST":
+        search = request.POST['search']
+        vehicle = Vehicle.objects.all().filter(plate__icontains=str(search))
+        dt = {
+                "Vehicles": vehicle,
+                "form": SearchingForm()
+            }
+        return render(request, 'history/add_violation_history.html', dt)
+    else:
+        dt = {"Vehicles": Vehicle.objects.all().order_by("-id"), "form": SearchingForm()}
+        return render(request, 'history/add_violation_history.html', dt)
+
 def get_list_violation(request):
     if request.method == "POST":
         search = request.POST['search']
-        violation = ViolationHistory.objects.all().select_related('vehicle').filter(vehicle__plate__icontains=str(search)).order_by("status")
-        return render(request, 'history/violation_history.html', {"form": SearchingForm(), "violation": violation})
+        # violation = ViolationHistory.objects.all().select_related('vehicle').filter(vehicle__plate__icontains=str(search)).order_by("-id")
+        violation = ViolationHistory.objects.all().select_related('vehicle').select_related('violation').filter(vehicle__plate__icontains=str(search)).order_by("-id")
+        vi_type = Violation.objects.all().order_by('description')
+        return render(request, 'history/violation_history.html', {"form": SearchingForm(), "violation": violation, "vi_type": vi_type})
         # return redirect('/vehicle')
     else:
-        return render(request, 'history/violation_history.html', {"form": SearchingForm()})
+        vi_type = Violation.objects.all().order_by("description")
+        return render(request, 'history/violation_history.html', {"form": SearchingForm(), "vi_type": vi_type})
+
+def get_list_unsure_violation(request):
+    if request.user.is_authenticated:
+        dt = {
+            "violation": UnsureViolationHistory.objects.all().order_by("-id")
+        }
+        return render(request, 'history/unsure_violation_history.html', dt)
+    else:
+        return redirect('login')
+    
+def get_detail_unsure_violation(request, pk):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            confirm = request.POST["confirm"]
+            try:
+                vehicle = Vehicle.objects.get(plate=str(confirm))
+                unsure_vio = UnsureViolationHistory.objects.get(id=pk)
+                violation = ViolationHistory.objects.create(description= unsure_vio.description, image= unsure_vio.image, vehicle_id= vehicle.id)
+                violation.save()
+                unsure_vio.delete()
+                messages.success(request, 'Number plate is existed.')
+                return redirect(f'/')
+            except:
+                messages.error(request, 'Cannot find a matched number plate!')
+                return redirect(f'/unsure_violation/{pk}')
+        else:
+            dt = {
+                "Violation": UnsureViolationHistory.objects.get(id=pk)
+            }
+            return render(request, 'history/detail_unsure_violation.html', dt)
+    else:
+        return redirect('login')
 
 class Add_Violation_History_API(APIView):
     def post(self, request):
@@ -31,7 +117,6 @@ class Add_Violation_History_API(APIView):
             serializer.save()
             list_of_files = glob.glob(r'D:\Vehicle_Violation\Vehicle_Violation\media\unsureviolation\*')
             latest_file = max(list_of_files, key=os.path.getctime)
-            print(latest_file)
 
             harcascade = r"D:\Vehicle_Violation\Vehicle_Violation\violation_history\haarcascade_russian_plate_number.xml"
             # Opening image
@@ -52,16 +137,20 @@ class Add_Violation_History_API(APIView):
                                     (x + width, y + height), 
                                     (0, 255, 0), 5)
                     plate = img_rgb[y:y+height, x:x+width]
-                    cv2.imwrite("result.jpg", plate)
-
-
-            reader = easyocr.Reader(['en'], gpu=True)
-            result = reader.readtext(r"D:\Vehicle_Violation\Vehicle_Violation\result.jpg")
+                    cv2.imwrite("plate.jpg", plate)
+            if plate is None:
+                return Response(status=status.HTTP_204_NO_CONTENT)
             try:
-                ve = Vehicle.objects.get(plate=result[0][-2])
-                des = request.POST['description']
-                img = request.FILES['image']
-                new_vio = ViolationHistory.objects.create(description=des, image= img, vehicle_id= ve.id)
+                reader = easyocr.Reader(['en'], gpu=True)
+                result = reader.readtext(r"D:\Vehicle_Violation\Vehicle_Violation\plate.jpg")
+            except:
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            try:
+                os.remove(r"D:\Vehicle_Violation\Vehicle_Violation\plate.jpg")
+                ve = Vehicle.objects.get(plate= str(result[0][-2]).upper().replace(' ', ''))
+                # des = request.POST['description']
+                image = request.FILES['image']
+                new_vio = ViolationHistory.objects.create(image= image, vehicle_id= ve.id, violation_id= 1)
                 new_vio.save()
                 unsure_vi = UnsureViolationHistory.objects.all().order_by("-id")[0]
                 unsure_vi.delete()
@@ -74,12 +163,30 @@ def pay_fee(request, pk):
         violation = ViolationHistory.objects.get(id=pk)
         violation.status = True
         violation.save()
+        messages.success(request, 'Paid the fee.')
         return redirect(f'/pay_fee/{pk}')
 
     elif request.method == "GET":
         # violation = ViolationHistory.objects.get(id=pk)
-        violation = ViolationHistory.objects.select_related('vehicle').get(id=pk)
+        violation = ViolationHistory.objects.all().select_related('vehicle').select_related('violation').get(id=pk)
         return render(request,"history/detail_violation.html", {"Violation": violation})
+
+def delete_violation_history(request, pk):
+    if request.user.is_authenticated:
+        violation = ViolationHistory.objects.get(id=pk)
+        violation.delete()
+        messages.success(request, 'Deleted violation history!')
+        return redirect("/")
+    else:
+        return redirect('login')
+
+def delete_unsure_violation(request, pk):
+    if request.user.is_authenticated:
+        un_vi = UnsureViolationHistory.objects.get(id=pk)
+        un_vi.delete()
+        return redirect("/unsure_violation")
+    else:
+        return redirect('login')
 
 
 def login_user(request):
@@ -91,7 +198,7 @@ def login_user(request):
             login(request, user)
             return redirect('/')
         else:
-            messages.success(request, "Error")
+            messages.success(request, "Wrong username or password!")
             return redirect('login')
     else:
         return render(request, 'pages/login.html')

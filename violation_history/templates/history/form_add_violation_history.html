@@ -1,0 +1,42 @@
+{% extends 'pages/base.html' %} 
+{% block title %}Edit vehicle profile{%endblock%} 
+{% load crispy_forms_tags %}
+{% block content %}
+<h1 class="display-6" style="text-align: center;">Add new violation for vehicle</h1>
+<hr class="my-4">
+<form method="POST" autocomplete="off" enctype="multipart/form-data" action="{% url 'add_violation_history' vehicle.id %}">
+  {% csrf_token %}
+  <div class="row">
+    <div class="col-md-4">
+      <label>Violation Type</label>
+      <select class="form-control" aria-label="Default select example" name="violation_type">
+        {% for vt in violation_type %}
+          <option value="{{ vt.id }}">{{ vt.description }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label>Time</label>
+    <input class="form-control" type="datetime-local" name="time" required>
+    </div>
+    <div class="col-md-4">
+      <label>Evidence</label>
+      <input class="form-control" name="image" type="file" required>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4">
+      <hr class="my-4">
+      <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fa-solid fa-floppy-disk"></i> <b>Confirm</b></button>  
+    </div>
+    <div class="col-md-4">
+      <label>Plate</label>
+      <input class="form-control" type="text" value="{{ vehicle.plate }}" readonly>
+    </div>
+    <div class="col-md-4">
+      <label>Owner</label>
+      <input class="form-control" type="text" value="{{ vehicle.owner }}" readonly>
+    </div>
+  </div>
+  </form>
+{% endblock content %}

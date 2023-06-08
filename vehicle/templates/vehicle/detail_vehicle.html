@@ -18,25 +18,25 @@
   <div class="col-md-4">
       {{form.color|as_crispy_field}}
   </div>
-  <div class="col-md-8">
+  <div class="col-md-4">
       {{form.owner|as_crispy_field}}
+  </div>
+  <div class="col-md-4">
+    <label>ID Number</label>
+    <input class="form-control"  readonly value="{{owner.owner.id_card}}">
   </div>
 </div> 
 <div class="row">
   <div class="col-md-5">
       {{form.image|as_crispy_field}}
-  </div>
-</div>
-  <div class="row">
-    <div class="col-md-8">
-        <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fa-solid fa-floppy-disk"></i> <b>Save</b></button>  
-    </div>
-    <div class="col-md-4">
+      <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fa-solid fa-floppy-disk"></i> <b>Save</b></button>  
       <a href="{% url 'veh' %}" class="btn btn-secondary btn-block btn-lg">
         <i class="fa-solid fa-arrow-left"></i> <b>Go back</b>
-    </a>
-    </div>
-</div>
-      
+      </a>
+  </div>
+  <div class="col-md-7">
+    <img src="{{ owner.image.url }}"  alt="None" class="img-thumbnail">
+  </div>
+</div>   
   </form>
 {% endblock content %}

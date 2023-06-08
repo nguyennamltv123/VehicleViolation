@@ -45,14 +45,17 @@ def get_detail_owner(request, pk):
         return redirect('login')
     
 def add_owner(request):
-    if request.method == "POST":
-        form = OwnerForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-        return redirect('/vehicle_owner')
-    elif request.method == "GET":
-        form = OwnerForm()
-        return render(request, 'owner/add_owner.html', {'form': form})
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            form = OwnerForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+            return redirect('/vehicle_owner')
+        elif request.method == "GET":
+            form = OwnerForm()
+            return render(request, 'owner/add_owner.html', {'form': form})
+    else:
+        return redirect('login')
     
 def edit_owner(request, pk):
     if request.user.is_authenticated:
@@ -64,7 +67,7 @@ def edit_owner(request, pk):
             return redirect('/vehicle_owner')
         elif request.method == "GET":
             owner = Owner.objects.get(id=pk)
-            context = {'form':OwnerForm(instance=owner)}
+            context = {'form':OwnerForm(instance=owner), 'owner': owner}
             return render(request,"owner/detail_owner.html",context)
     else:
         return redirect('login')

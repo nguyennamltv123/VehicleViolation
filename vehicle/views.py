@@ -19,7 +19,7 @@ def list_vehicle(request):
             }
             return render(request, 'vehicle/vehicle.html', dt)
         else:
-            dt = {"Vehicles": Vehicle.objects.all(), "form": SearchingForm()}
+            dt = {"Vehicles": Vehicle.objects.all().order_by("-id"), "form": SearchingForm()}
             return render(request, 'vehicle/vehicle.html', dt)
     else:
         return redirect('login')
@@ -71,7 +71,8 @@ def edit_vehicle(request, pk):
         return redirect('/vehicle')
     elif request.method == "GET":
         vehicle = Vehicle.objects.get(id=pk)
-        context = {'form': VehicleForm(instance=vehicle)}
+        vehicle_owner = Vehicle.objects.select_related('owner').get(id=pk)
+        context = {'form': VehicleForm(instance=vehicle), 'owner': vehicle_owner}
         return render(request,"vehicle/detail_vehicle.html",context)
 
 def delete_vehicle(request, pk):

@@ -8,24 +8,22 @@
   {% csrf_token %}
 
   <div class="row">
-    <div class="col-md-5">
+    <div class="col-md-4">
+      <img src="{{ owner.image.url }}"  alt="None" class="img-thumbnail" style="width: 250px; height: 300px;">
+    </div>
+    <div class="col-md-4">
         {{form.firstname|as_crispy_field}}
-    </div>
-    <div class="col-md-7">
-        {{form.lastname|as_crispy_field}}
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-md-4">
         {{form.id_card|as_crispy_field}}
+        {{form.email|as_crispy_field}}
+        <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fa-solid fa-floppy-disk"></i> <b>Save</b></button>  
+        <a href="{% url 'own' %}" class="btn btn-secondary btn-block btn-lg">
+          <i class="fa-solid fa-arrow-left"></i> <b>Go back</b>
+      </a>
     </div>
     <div class="col-md-4">
+        {{form.lastname|as_crispy_field}}
         {{form.phone|as_crispy_field}}
     </div>
-    <div class="col-md-4">
-      {{form.email|as_crispy_field}}
-  </div>
   </div>
 
   <div class="row">
@@ -34,15 +32,6 @@
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-md-8">
-        <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fa-solid fa-floppy-disk"></i> <b>Save</b></button>  
-    </div>
-    <div class="col-md-4">
-      <a href="{% url 'own' %}" class="btn btn-secondary btn-block btn-lg">
-        <i class="fa-solid fa-arrow-left"></i> <b>Go back</b>
-    </a>
-    </div>
-</div>
+  
   </form>
 {% endblock content %}
