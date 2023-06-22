@@ -147,3 +147,8 @@ MESSAGE_TAGS = {
         messages.WARNING: 'alert-warning',
         messages.ERROR: 'alert-danger',
 }
+
+# CSRF_COOKIE_DOMAIN = '3ffe-113-23-5-136.ngrok-free.app'
+# CSRF_TRUSTED_ORIGINS = ["https://0c0f-113-23-5-136.ngrok-free.app"]
+# CSRF_COOKIE_SECURE = False
+# CSRF_COOKIE_HTTPONLY = False

@@ -1,0 +1,22 @@
+{% extends 'pages/base.html' %} 
+{% block title %}Register new user{%endblock%} 
+{% load crispy_forms_tags %}
+{% block content %}
+<h1 class="display-6" style="text-align: center;">Register user</h1>
+<hr class="my-4">
+<div class="row">
+  <div class="col-md-5">
+    <form action="{% url 'register' %}" method="POST" >
+      {% csrf_token %}
+            {{form.username|as_crispy_field}}
+            {{form.password1|as_crispy_field}}
+          {{form.password2|as_crispy_field}}
+        <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fa-solid fa-right-to-bracket"></i> <b>Register</b></button>  
+      </form>
+  </div>
+  <div class="col-md-7">
+    <img src="https://sites.google.com/a/cob.us/traffic/_/rsrc/1427742133903/home/Traffdepart.jpg"  alt="None" class="img-thumbnail">
+  </div>
+</div>
+
+{% endblock %}

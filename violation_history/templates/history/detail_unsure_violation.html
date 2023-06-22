@@ -1,25 +1,35 @@
 {% extends 'pages/base.html' %} 
-{% block title %}Edit vehicle profile{%endblock%} 
+{% block title %}Unsure Violation{%endblock%} 
 {% load crispy_forms_tags %}
 {% block content %}
-<h1 class="display-4" style="text-align: center;">Details of vehicle</h1>
+<h1 class="display-4" style="text-align: center;">Details of unsure violation</h1>
 <hr class="my-4">
-<div class="row">
-  <div class="col-md-4">
 <form method="POST" autocomplete="off" enctype="multipart/form-data" action="{% url 'detail_unsure_violation_list' Violation.id %}">
   {% csrf_token %}
-        <label>Description</label>
-        <input class="form-control"  readonly value="{{Violation.description}}">
-        <label>Time</label>
-        <input class="form-control" readonly value="{{Violation.time}}">
-        <label>Confirm plate number</label>
-        <input class="form-control" name="confirm" placeholder="plate number">
-        <hr class="my-4">
-        <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fa-solid fa-floppy-disk"></i> <b>Confirm</b></button>  
-  </form>
-  </div> 
-  <div class="col-md-8">
-    <img src="{{ Violation.image.url }}"  alt="None" class="img-thumbnail">
+  <div class="row">
+    <div class="col-md-6">
+      <img src="{{ Violation.image.url }}"  alt="None" class="img-thumbnail">
+    </div>
+    <div class="col-md-6">
+      <img src="{{ Violation.wide_image.url }}" style="width: 100%;"  alt="None" class="img-thumbnail">
+    </div>
   </div>
-</div>
+  <div class="row">
+    <div class="col-md-4">
+      <label>Description</label>
+      <input class="form-control"  readonly value="{{Violation.description}}">
+    </div>
+    <div class="col-md-4">
+      <label>Time</label>
+      <input class="form-control" readonly value="{{Violation.time}}">
+    </div>
+    <div class="col-md-4">
+      <label>Confirm plate number</label>
+      <input class="form-control" name="confirm" placeholder="plate number">
+      <hr>
+    <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fa-solid fa-floppy-disk"></i> <b>Confirm</b></button>  
+    </div>
+  </div>
+  </form>
+
 {% endblock content %}

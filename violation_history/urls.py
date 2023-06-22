@@ -13,6 +13,12 @@ urlpatterns = [
     path('pay_fee/<int:pk>', views.pay_fee, name='payfee'),
     path('login/', views.login_user, name='login'),
     path('logout/', views.logout_user, name='logout'),
+    path('register/', views.register_user, name='register'),
+    path('change_password/', views.PasswordsChangeView.as_view(template_name='pages/change-password.html'), name='change_password'),
+    path('change_password_done/', views.change_password_done, name='change_password_done'),
     path('delete_unsure_violation/<int:pk>/', views.delete_unsure_violation, name='delete_unsure_violation'),
     path('delete_violation_history/<int:pk>/', views.delete_violation_history, name='delete_violation_history'),
+    path('get_vehicle_API/<str:pla>', views.Get_Vehicle_API.as_view()),
+    path('add_unsure_violation_API/', views.Add_Unsure_Violation_API.as_view()),
+    path('add_violation_API/', views.Add_Violation_API.as_view()),
 ]

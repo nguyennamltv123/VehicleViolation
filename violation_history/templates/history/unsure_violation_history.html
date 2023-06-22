@@ -1,8 +1,8 @@
 {% extends 'pages/base.html' %} 
-{% block title %}Owner Management{%endblock%} 
+{% block title %}Unsure Violation{%endblock%} 
 {% block content %}
 {% load crispy_forms_tags %}
-<h1 class="display-6" style="text-align: center;">Unsure Violation</h1>
+<h1 class="display-4" style="text-align: center;">Unsure violation</h1>
 <hr class="my-4">
 <table class="table table-striped">
   <thead class="border-bottom font-weight-bold">
@@ -34,7 +34,7 @@
           <td>
             <form action="{% url 'delete_unsure_violation' v.id %}" method="POST" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" class="btn">
+                <button type="submit" class="btn" onclick="return confirm('Are you sure you would like to delete this violation?');">
                     <i class="fa-solid fa-trash" style="color: red"></i>
                 </button>
             </form>

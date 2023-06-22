@@ -1,10 +1,10 @@
 {% extends 'pages/base.html' %} 
-{% block title %}Owner Management{%endblock%} 
+{% block title %}Violation History{%endblock%} 
 {% block content %}
 {% load crispy_forms_tags %}
-<h1 class="display-6" style="text-align: center;">Search for vehicle violation</h1>
+<h1 class="display-4" style="text-align: center;">Search for violation history</h1>
 <hr class="my-4">
-{% csrf_token %}
+
 <div class="row">
   <div class="col-md-3">
   <form action="" method="POST" autocomplete="off">
@@ -47,6 +47,11 @@
     <a href="{% url 'addtype' %}" class="btn btn-success btn-block btn-lg">
       <i class="fa-solid fa-plus"></i> <b>Add violation type</b>
     </a>
+    {% if violation %}
+    <h2>Found {{ violation|length }} violations</h2>
+    {% else %}
+    <h2>There is 0 violations</h2>
+    {% endif %}
   </div>
   {% endif %}
 </div>
@@ -95,7 +100,7 @@
           <td>
             <form action="{% url 'delete_violation_history' v.id %}" method="POST" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" class="btn">
+                <button type="submit" class="btn" onclick="return confirm('Are you sure you would like to delete this violation?');">
                     <i class="fa-solid fa-trash" style="color: red"></i>
                 </button>
             </form>

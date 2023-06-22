@@ -11,12 +11,13 @@
         <a href="{% url 'veh' %}" class="btn btn-secondary btn-block btn-lg">
             <i class="fa-solid fa-rotate-right"></i> <b>Reload</b>
         </a>
+        <h3 style="display: flex; justify-content: center; align-items: center;">Found {{ Vehicles|length }} cars</h3>
     </div>
     <div class="col-md-6">
         <form action="" method="POST" autocomplete="off">
             {% csrf_token %}
             {{form.search|as_crispy_field}}
-            <button type="submit" class="btn btn-success btn-lg"><i class="fa-solid fa-magnifying-glass"></i>  Search</button>  
+                    <button type="submit" class="btn btn-success btn-lg"><i class="fa-solid fa-magnifying-glass"></i>  Search</button>  
             </form>
     </div>
 </div> 
@@ -53,7 +54,7 @@
             <td>
                 <form action="{% url 'deletevehicle' v.id %}" method="POST" class="d-inline">
                     {% csrf_token %}
-                    <button type="submit" class="btn">
+                    <button type="submit" class="btn" onclick="return confirm('Are you sure you would like to delete this vehicle?');">
                         <i class="fa-solid fa-trash" style="color: red"></i>
                     </button>
                 </form>

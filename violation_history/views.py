@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.contrib.auth.views import PasswordChangeView
+from django.urls import reverse_lazy
 from django.contrib import messages
 from .models import ViolationHistory, UnsureViolationHistory, Violation
 from vehicle.models import Vehicle
@@ -16,8 +19,12 @@ import os
 # import json
 import time
 import requests
+from django.views.decorators.csrf import csrf_exempt
 
-# Create your views here.
+
+
+
+@csrf_exempt
 def add_violation_type(request):
     if request.user.is_authenticated:
         if request.method == "POST":
@@ -31,6 +38,7 @@ def add_violation_type(request):
     else:
         return redirect('login')
 
+@csrf_exempt
 def add_violation_history(request, pk):
     if request.user.is_authenticated:
         if request.method == "POST":
@@ -53,6 +61,7 @@ def add_violation_history(request, pk):
     else:
         return redirect('login')
 
+@csrf_exempt
 def search_vehicle_has_violation(request):
     if request.method == "POST":
         search = request.POST['search']
@@ -66,6 +75,7 @@ def search_vehicle_has_violation(request):
         dt = {"Vehicles": Vehicle.objects.all().order_by("-id"), "form": SearchingForm()}
         return render(request, 'history/add_violation_history.html', dt)
 
+@csrf_exempt
 def get_list_violation(request):
     if request.method == "POST":
         search = request.POST['search']
@@ -78,6 +88,7 @@ def get_list_violation(request):
         vi_type = Violation.objects.all().order_by("description")
         return render(request, 'history/violation_history.html', {"form": SearchingForm(), "vi_type": vi_type})
 
+
 def get_list_unsure_violation(request):
     if request.user.is_authenticated:
         dt = {
@@ -86,7 +97,8 @@ def get_list_unsure_violation(request):
         return render(request, 'history/unsure_violation_history.html', dt)
     else:
         return redirect('login')
-    
+
+@csrf_exempt    
 def get_detail_unsure_violation(request, pk):
     if request.user.is_authenticated:
         if request.method == "POST":
@@ -110,7 +122,31 @@ def get_detail_unsure_violation(request, pk):
     else:
         return redirect('login')
 
+class Get_Vehicle_API(APIView):
+    def get(self, request, pla):
+        try:
+            vehicle = Vehicle.objects.get(plate=pla)
+            return Response(status=status.HTTP_200_OK, data={"vehicle_id": vehicle.id})
+        except:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+class Add_Unsure_Violation_API(APIView):
+    def post(self, request):
+        serializer = UnsureViolationHistorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+class Add_Violation_API(APIView):
+    def post(self, request):
+        serializer = ViolationHistorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
 class Add_Violation_History_API(APIView):
+    @csrf_exempt
     def post(self, request):
         serializer = UnsureViolationHistorySerializer(data=request.data)
         if serializer.is_valid():
@@ -134,9 +170,9 @@ class Add_Violation_History_API(APIView):
             if amount_found != 0:
                 for (x, y, width, height) in found:
                     cv2.rectangle(img_rgb, (x, y), 
-                                    (x + width, y + height), 
+                                    (x + width + 40, y + height), 
                                     (0, 255, 0), 5)
-                    plate = img_rgb[y:y+height, x:x+width]
+                    plate = img_rgb[y:y+height, x:x+width+40]
                     cv2.imwrite("plate.jpg", plate)
             if plate is None:
                 return Response(status=status.HTTP_204_NO_CONTENT)
@@ -148,16 +184,17 @@ class Add_Violation_History_API(APIView):
             try:
                 os.remove(r"D:\Vehicle_Violation\Vehicle_Violation\plate.jpg")
                 ve = Vehicle.objects.get(plate= str(result[0][-2]).upper().replace(' ', ''))
-                # des = request.POST['description']
                 image = request.FILES['image']
-                new_vio = ViolationHistory.objects.create(image= image, vehicle_id= ve.id, violation_id= 1)
+                wideimage = request.FILES['wide_image']
+                # new_vio = ViolationHistory.objects.create(image= image, vehicle_id= ve.id, violation_id= 1)
+                new_vio = ViolationHistory.objects.create(image= image, wide_image= wideimage, vehicle_id= ve.id, violation_id= 1)
                 new_vio.save()
                 unsure_vi = UnsureViolationHistory.objects.all().order_by("-id")[0]
                 unsure_vi.delete()
                 return Response(status=status.HTTP_200_OK)
             except:
                 return Response(status=status.HTTP_204_NO_CONTENT)
-
+@csrf_exempt
 def pay_fee(request, pk):
     if request.method == "POST":
         violation = ViolationHistory.objects.get(id=pk)
@@ -171,6 +208,7 @@ def pay_fee(request, pk):
         violation = ViolationHistory.objects.all().select_related('vehicle').select_related('violation').get(id=pk)
         return render(request,"history/detail_violation.html", {"Violation": violation})
 
+@csrf_exempt
 def delete_violation_history(request, pk):
     if request.user.is_authenticated:
         violation = ViolationHistory.objects.get(id=pk)
@@ -180,6 +218,7 @@ def delete_violation_history(request, pk):
     else:
         return redirect('login')
 
+@csrf_exempt
 def delete_unsure_violation(request, pk):
     if request.user.is_authenticated:
         un_vi = UnsureViolationHistory.objects.get(id=pk)
@@ -188,7 +227,7 @@ def delete_unsure_violation(request, pk):
     else:
         return redirect('login')
 
-
+@csrf_exempt
 def login_user(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -203,6 +242,29 @@ def login_user(request):
     else:
         return render(request, 'pages/login.html')
     
+@csrf_exempt
+def register_user(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+            user = authenticate(request, username=username, password=password)
+            login(request, user)
+            messages.success(request, "Register successfully!")
+            return redirect('/')
+    else:
+        form = UserCreationForm()
+    return render(request, 'pages/register.html', {'form': form})
+
 def logout_user(request):
     logout(request)
     return redirect('login')
+
+class PasswordsChangeView(PasswordChangeView):
+    from_class = PasswordChangeForm
+    success_url = reverse_lazy('change_password_done')
+
+def change_password_done(request):
+    return render(request, 'pages/password-changed.html')
