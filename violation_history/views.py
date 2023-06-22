@@ -12,8 +12,8 @@ from rest_framework.views  import APIView
 from .serializers import ViolationHistorySerializer, UnsureViolationHistorySerializer
 from rest_framework.response import Response
 from rest_framework import status
-import cv2
-import easyocr
+# import cv2
+# import easyocr
 import glob
 import os
 # import json
